@@ -1,7 +1,7 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 
-$lang['photo_gallery:add'] = "Add Gallery";
+$lang['photo_gallery:add_title'] = "Add Gallery";
 $lang['photo_gallery:title'] = "Photo Galleries";
 
 /* End of file gallery_lang.php */

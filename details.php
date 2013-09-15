@@ -2,10 +2,12 @@
 
 class Module_Photo_Gallery extends Module {
 
-    public $version = '0.1.1';
+    public $version = '0.1.0';
 
     public function info()
-    {   
+    {
+        $this->lang->load('photo_gallery/gallery');
+
         $info = array(
             'name' => array(
                 'en' => 'Photo Gallery'),
@@ -16,12 +18,12 @@ class Module_Photo_Gallery extends Module {
             'skip_xss' => true,
             'menu' => 'content',
             'sections' => array(
-                'gallery' => array(
-                    'name' => 'gallery:title',
+                'galleries' => array(
+                    'name' => 'photo_gallery:title',
                     'uri' => 'admin/photo_gallery',
                     'shortcuts' => array(
                         array(
-                            'name' => 'gallery:add_title',
+                            'name' => 'photo_gallery:add_title',
                             'uri' => 'admin/photo_gallery/create',
                             'class' => 'add',
                         ),
@@ -35,7 +37,7 @@ class Module_Photo_Gallery extends Module {
 
     public function install()
     {
-        $this->dbforge->drop_table('photo_galleries');
+        $this->dbforge->drop_table('photo_gallery_rel');
         $this->dbforge->drop_table('photo_gallery');
 
         // Create the gallery schema
@@ -43,7 +45,7 @@ class Module_Photo_Gallery extends Module {
             `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
             `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
             `description` text COLLATE utf8_unicode_ci NOT NULL,
-            `thumbnail_id` int(11) unsigned NOT NULL,
+            `thumbnail_id` int(11) unsigned DEFAULT 0,
             `slug` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
             `status` int(1) NOT NULL,
             `created_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -52,10 +54,22 @@ class Module_Photo_Gallery extends Module {
         ) 
         ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
+        // Create the gallery relationships schema
+        $gallery_rel_schema = "CREATE TABLE " . $this->db->dbprefix('photo_gallery_rel') . " (
+                `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+                `gallery_id` int(10) unsigned NOT NULL,
+                `image_id` int(10) unsigned NOT NULL,
+                PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;";
+        
+        // Lets create the tables needed 
         if(!$this->db->query($gallery_schema)) {
-            $this->session->set_flashdata('error', 'There was an error creating the photo gallery database table');
             return false;
+        }
 
+        if(!$this->db->query($gallery_rel_schema)) {
+            $this->session->set_flashdata('error', 'Tehre was an error creating the photo gallery relations table');
+            return false;
         }
 
         return true;
@@ -63,7 +77,7 @@ class Module_Photo_Gallery extends Module {
 
     public function uninstall()
     {
-        if(!$this->dbforge->drop_table('photo_gallery')) {
+        if(!$this->dbforge->drop_table('photo_gallery') && !$this->dbforge->drop_table('photo_gallery_rel')) {
             return false;
         }
 
