@@ -53,6 +53,56 @@ class Admin extends Admin_Controller {
     {
         $this->load->model('photo_gallery_m');
         $this->load->model('images_m');
+        $this->load->model('gallery_relations_m');
+
+        $gallery = $this->photo_gallery_m->get_gallery($id);
+        $images = $this->gallery_relations_m->get_images($id);
+
+        $this->template->set('title', 'Add Photos to ' . $gallery->name)
+                       ->set('gallery', $gallery)
+                       ->set('images', $images)
+                       ->append_css('module::files.css')
+                       ->append_js('module::gallery.js')
+                       ->build('admin/edit');
+    }
+
+    public function add_image($ajax=false)
+    {
+        $this->load->model('gallery_relations_m');
+        $success_message = 'Image was added successfully';
+        $error_message = 'Image already exists';
+        $input = array(
+            'gallery_id' => $this->input->post('gallery_id'),
+            'image_id' => $this->input->post('image_id')
+        );
+
+        if($this->gallery_relations_m->image_exists_in_gallery($input['image_id'])) {
+            //error
+            if($ajax) {
+                echo json_encode(array(
+                    'message' => $error_message,
+                    'type' => 'error',
+                    'location' => ''
+                    ));
+                exit();
+            } else {
+                $this->session->set_flashdata('error', $error_message);
+                redirect('admin/photo_gallery/edit/' . $this->input->post('gallery_id'));
+            }
+        }
+
+        $this->gallery_relations_m->insert($input);
+        // success
+        if($ajax) {
+            echo json_encode(array(
+                'message' => $success_message,
+                'type' => 'success',
+                'location' => 'added'));
+            exit();  
+        } else {
+            $this->session->set_flashdata('success', $success_message);
+            redirect('admin/photo_gallery/edit/' . $this->input->post('gallery_id'));
+        }
     }
 }
 
