@@ -20,6 +20,7 @@ class Photo_Gallery_m extends MY_Model {
     public function get_all($limit=0, $offset=0)
     {   
         $this->db->select('*');
+        $this->db->where('status', 1);
         $query = $this->db->get('photo_gallery');
         if($query->num_rows() > 0) {
             return $query->result();
@@ -73,8 +74,9 @@ class Photo_Gallery_m extends MY_Model {
     }
     
     public function update($id, $input=array(), $skip_validation=false)
-    {
-        
+    {   
+        $this->db->where('id', $id);
+        return $this->db->update('photo_gallery', $input);
     }
 
     public function insert($input=array(), $skip_validation=false)
@@ -85,6 +87,11 @@ class Photo_Gallery_m extends MY_Model {
 
         $this->db->insert('photo_gallery', $input);
         return $this->db->insert_id();
+    }
+
+    public function gallery_exists($gallery_id)
+    {
+        
     }
 
 }

@@ -45,7 +45,7 @@ class Module_Photo_Gallery extends Module {
             `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
             `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
             `description` text COLLATE utf8_unicode_ci NOT NULL,
-            `thumbnail_id` int(11) unsigned DEFAULT 0,
+            `thumbnail_id` char(15) DEFAULT NULL,
             `slug` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
             `status` int(1) NOT NULL,
             `created_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -58,7 +58,7 @@ class Module_Photo_Gallery extends Module {
         $gallery_rel_schema = "CREATE TABLE " . $this->db->dbprefix('photo_gallery_rel') . " (
                 `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
                 `gallery_id` int(10) unsigned NOT NULL,
-                `image_id` int(10) unsigned NOT NULL,
+                `image_id` char(15) NOT NULL,
                 PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;";
         
@@ -68,7 +68,6 @@ class Module_Photo_Gallery extends Module {
         }
 
         if(!$this->db->query($gallery_rel_schema)) {
-            $this->session->set_flashdata('error', 'Tehre was an error creating the photo gallery relations table');
             return false;
         }
 
@@ -77,11 +76,11 @@ class Module_Photo_Gallery extends Module {
 
     public function uninstall()
     {
-        if(!$this->dbforge->drop_table('photo_gallery') && !$this->dbforge->drop_table('photo_gallery_rel')) {
-            return false;
+        if($this->dbforge->drop_table('photo_gallery') && $this->dbforge->drop_table('photo_gallery_rel')) {
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     public function upgrade($old_version)

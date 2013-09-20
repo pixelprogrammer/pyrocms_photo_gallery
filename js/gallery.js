@@ -7,8 +7,8 @@
 
 $(document).ready(function() {
     // attach all the add image events to the images
-    var add_image_selector = $('.add-image');
-    attach_add_event(add_image_selector);
+    attach_add_event($('.add-image'));
+    attach_remove_event($('.remove-image'));
 });
 
 function attach_add_event(selector) {
@@ -51,12 +51,32 @@ function ajax_add_image() {
 
 function ajax_remove_image() {
     console.log('removing image...');
+    var _this = this;
+
+    $.ajax({
+        url: SITE_URL + 'admin/photo_gallery/remove_image/ajax',
+        type: 'post',
+        dataType: 'json',
+        data: {
+            gallery_id: $('input[name="gallery_id"]').val(),
+            image_id: $(this).attr('data-id')
+        },
+        success: function(data) {
+            if(data.type == 'error') {
+                add_error_message(data.message);
+            } else {
+                remove_image(data, _this);
+            }
+        }
+    });
     return false;
 }
 
-function remove_image(data) {
+function remove_image(data, image) {
     console.log('Image Removed');
-    add_error_message(data.message);
+    move_image(data.location, image);
+    $(image).off().on('click', ajax_add_image);
+    add_success_message(data.message);
 }
 
 function add_image(data, image) {
@@ -66,9 +86,9 @@ function add_image(data, image) {
 }
 
 function move_image(location, image) {
-    var new_location = '#remove-photos';
+    var new_location = '#remove-photos-container';
     if(location != 'added') {
-        new_location = '#add-photos';
+        new_location = '#add-photos-container';
     }
     $(image).fadeOut(200, function() {
         $(this).appendTo(new_location);
