@@ -166,6 +166,23 @@ class Admin extends Admin_Controller {
             redirect('admin/photo_gallery/edit/' . $this->input->post('gallery_id'));
         }
     }
+
+    public function delete($gallery_id=false)
+    {
+        $this->load->model('photo_gallery_m');
+        $this->load->model('gallery_relations_m');
+
+        if(!$gallery_id) {
+            $this->session->set_flashdata('error', 'Can\'t delete gallery. No ID provided');
+            redirect('admin/photo_gallery');
+        }
+
+        $this->photo_gallery_m->delete($gallery_id);
+        $this->gallery_relations_m->delete_all_images($gallery_id);
+
+        $this->session->set_flashdata('success', 'Gallery has been removed');
+        redirect('admin/photo_gallery');
+    }
 }
 
 /* End of file admin.php */

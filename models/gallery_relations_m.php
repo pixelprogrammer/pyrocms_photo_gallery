@@ -60,6 +60,11 @@ class Gallery_Relations_m extends MY_Model {
         $this->db->delete('photo_gallery_rel', $input);
     }
 
+    public function delete_all_images($gallery_id)
+    {
+        $this->db->delete('photo_gallery_rel', array('gallery_id', $gallery_id));
+    }
+
 }
 
 /* End of file gallery_relations_m.php */

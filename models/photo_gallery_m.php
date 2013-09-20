@@ -89,6 +89,11 @@ class Photo_Gallery_m extends MY_Model {
         return $this->db->insert_id();
     }
 
+    public function delete($gallery_id)
+    {
+        $this->db->delete('photo_gallery', array('id' => $gallery_id));
+    }
+    
     public function gallery_exists($gallery_id)
     {
         
