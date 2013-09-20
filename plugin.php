@@ -89,16 +89,33 @@ class Plugin_Photo_Gallery extends Plugin {
 
     public function loop_counter()
     {
-        static $counter = 0;
+        static $counter = array();
 
-        if($this->attribute('reset')) {
-            $counter = 0;
+        $identifier = $this->attribute('identifier') ? $this->attribute('identifier') : 'default';
+
+        if($this->attribute('start') != NULL) {
+            $counter[$identifier] = (int)$this->attribute('start');
             return;
         }
 
-        $counter++;
+        // calculate the step
+        if($this->attribute('step') != NULL && is_numeric((int)$this->attribute('step'))) {
+            $counter[$identifier] += (int)$this->attribute('step');
+        }
 
-        return $counter;
+        if($this->attribute('true_every')) {
+            // this will return true every number of sequences
+            if($counter[$identifier]%(int)$this->attribute('true_every') == 0){
+                return true; // the counter is divisible by the number
+            }
+
+            return false;
+        }
+
+        if(!$this->attribute('show') || !$this->attribute('show') == 'false') {
+            return $counter[$identifier];
+        }
+
     }
 
 }
